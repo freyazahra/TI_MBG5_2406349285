@@ -31,7 +31,7 @@ graph TD
         UI --> Service
     end
 
-    subgraph Server ["Backend (Spring Boot 4 / Java 23)"]
+    subgraph Server ["Backend (Spring Boot 4 / Java 25)"]
         Controller["Controllers (REST Endpoints)"]
         ServiceLayer["Services (Business Logic & Validation)"]
         Repo["Spring Data JPA Repositories"]
@@ -202,7 +202,7 @@ Format Response Standar:
 ## 6. Panduan Instalasi dan Menjalankan Proyek
 
 ### Prasyarat
-- Java JDK 23+
+- Java JDK 25
 - Node.js v22+ / v24+
 - Docker & Docker Compose
 
@@ -228,6 +228,11 @@ cd simbg-2406349285-be
 ./gradlew bootJar
 ```
 Back End berjalan pada: `http://localhost:8080`.  
+Untuk menjalankan JAR yang sudah dibangun, jalankan dari folder `simbg-2406349285-be` agar file `.env` terbaca:
+```bash
+cd simbg-2406349285-be
+java -jar ../MBG52406349285.jar
+```
 Data seeder otomatis mengisi data awal yang konsisten dengan spesifikasi soal.
 
 ### 3. Menjalankan Front End (Vue.js)

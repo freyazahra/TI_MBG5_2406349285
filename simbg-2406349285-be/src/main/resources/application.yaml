@@ -6,9 +6,9 @@ spring:
     name: simbg-2406349285-be
 
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:15432/simbg}
-    username: ${DB_USERNAME:simbg}
-    password: ${DB_PASSWORD:simbg}
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
