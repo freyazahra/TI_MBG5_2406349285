@@ -1,17 +1,18 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { simbgService } from '@/services/simbg.service'
-import { formatRupiah } from '@/utils/formatters'
+import { formatRupiah, formatDate } from '@/utils/formatters'
 import type { Anggaran, BudgetComponent, CreateBudgetComponentPayload } from '@/types'
 
 const route = useRoute()
-const router = useRouter()
 const anggaranId = route.params.id as string
 
 const loading = ref(true)
+const notFound = ref(false)
 const anggaran = ref<Anggaran | null>(null)
 const components = ref<BudgetComponent[]>([])
+const detailComponent = ref<BudgetComponent | null>(null)
 
 const isModalOpen = ref(false)
 const isEditMode = ref(false)
@@ -37,8 +38,17 @@ async function loadData() {
     components.value = dataComponents || []
   } catch (error) {
     console.error('Failed to load detail:', error)
+    notFound.value = true
   } finally {
     loading.value = false
+  }
+}
+
+async function openDetail(c: BudgetComponent) {
+  try {
+    detailComponent.value = await simbgService.getComponentById(anggaranId, c.id)
+  } catch (error) {
+    console.error('Failed to load component detail:', error)
   }
 }
 
@@ -102,6 +112,12 @@ onMounted(() => {
 
 <template>
   <div class="space-y-6 max-w-7xl mx-auto">
+    <div v-if="notFound" class="text-center py-16 bg-white rounded-2xl border border-slate-200/80 shadow-sm">
+      <p class="font-extrabold text-slate-900">Data anggaran tidak ditemukan</p>
+      <p class="text-xs text-slate-500 mt-1">Anggaran dengan ID {{ anggaranId }} tidak tersedia.</p>
+      <router-link to="/anggaran" class="inline-block mt-4 text-xs font-bold text-emerald-700 hover:underline">← Kembali ke daftar anggaran</router-link>
+    </div>
+
     <!-- Top Details Card -->
     <div v-if="anggaran" class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
@@ -155,7 +171,7 @@ onMounted(() => {
     </div>
 
     <!-- Components Grid -->
-    <div>
+    <div v-if="!notFound">
       <div class="flex items-center justify-between mb-4">
         <h3 class="font-extrabold text-slate-900 text-sm">Komponen Anggaran ({{ components.length }})</h3>
       </div>
@@ -188,12 +204,20 @@ onMounted(() => {
                 </div>
               </div>
 
-              <button
-                @click="openEditModal(c)"
-                class="text-xs font-semibold text-emerald-700 hover:text-emerald-800 hover:underline cursor-pointer"
-              >
-                Edit
-              </button>
+              <div class="flex items-center gap-3">
+                <button
+                  @click="openDetail(c)"
+                  class="text-xs font-semibold text-slate-600 hover:text-slate-800 hover:underline cursor-pointer"
+                >
+                  Detail
+                </button>
+                <button
+                  @click="openEditModal(c)"
+                  class="text-xs font-semibold text-emerald-700 hover:text-emerald-800 hover:underline cursor-pointer"
+                >
+                  Ubah
+                </button>
+              </div>
             </div>
 
             <div class="mt-4">
@@ -219,6 +243,29 @@ onMounted(() => {
             <span v-if="c.description" class="truncate max-w-[140px]">{{ c.description }}</span>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Modal Detail Komponen -->
+    <div v-if="detailComponent" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+      <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
+          <div>
+            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">DETAIL KOMPONEN - {{ detailComponent.id }}</p>
+            <h3 class="text-lg font-extrabold text-slate-900">{{ detailComponent.componentName }}</h3>
+          </div>
+          <button @click="detailComponent = null" class="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer">✕</button>
+        </div>
+        <dl class="grid grid-cols-2 gap-4 text-xs">
+          <div><dt class="text-slate-400 font-medium">Alokasi dana</dt><dd class="font-extrabold text-slate-900 mt-0.5">{{ formatRupiah(detailComponent.allocatedAmount) }}</dd></div>
+          <div><dt class="text-slate-400 font-medium">Total ClaimItem terpakai</dt><dd class="font-extrabold text-slate-900 mt-0.5">{{ formatRupiah(detailComponent.usedAmount) }}</dd></div>
+          <div><dt class="text-slate-400 font-medium">Sisa alokasi</dt><dd class="font-extrabold text-emerald-700 mt-0.5">{{ formatRupiah(detailComponent.remainingAmount) }}</dd></div>
+          <div><dt class="text-slate-400 font-medium">Basis tarif</dt><dd class="font-bold text-slate-800 mt-0.5">{{ detailComponent.rateBasis }}</dd></div>
+          <div><dt class="text-slate-400 font-medium">Tarif maksimum</dt><dd class="font-bold text-slate-800 mt-0.5">{{ formatRupiah(detailComponent.maxRate) }}</dd></div>
+          <div><dt class="text-slate-400 font-medium">Deskripsi</dt><dd class="text-slate-700 mt-0.5">{{ detailComponent.description || '-' }}</dd></div>
+          <div><dt class="text-slate-400 font-medium">Dibuat</dt><dd class="text-slate-700 mt-0.5">{{ formatDate(detailComponent.createdAt) }}</dd></div>
+          <div><dt class="text-slate-400 font-medium">Diperbarui</dt><dd class="text-slate-700 mt-0.5">{{ formatDate(detailComponent.updatedAt) }}</dd></div>
+        </dl>
       </div>
     </div>
 

@@ -16,9 +16,11 @@ const route = useRoute()
 const claimId = route.params.id as string
 
 const loading = ref(true)
+const notFound = ref(false)
 const claim = ref<Claim | null>(null)
 const items = ref<ClaimItem[]>([])
 const components = ref<BudgetComponent[]>([])
+const detailItem = ref<ClaimItem | null>(null)
 
 // Modals
 const isItemModalOpen = ref(false)
@@ -66,8 +68,17 @@ async function loadData() {
     }
   } catch (error) {
     console.error('Failed to load claim detail:', error)
+    if (!claim.value) notFound.value = true
   } finally {
     loading.value = false
+  }
+}
+
+async function openItemDetail(item: ClaimItem) {
+  try {
+    detailItem.value = await simbgService.getClaimItemById(claimId, item.id)
+  } catch (error) {
+    console.error('Failed to load claim item detail:', error)
   }
 }
 
@@ -204,6 +215,12 @@ onMounted(() => {
 
 <template>
   <div class="space-y-6 max-w-7xl mx-auto">
+    <div v-if="notFound" class="text-center py-16 bg-white rounded-2xl border border-slate-200/80 shadow-sm">
+      <p class="font-extrabold text-slate-900">Data claim tidak ditemukan</p>
+      <p class="text-xs text-slate-500 mt-1">Claim dengan ID {{ claimId }} tidak tersedia.</p>
+      <router-link to="/claim" class="inline-block mt-4 text-xs font-bold text-emerald-700 hover:underline">← Kembali ke daftar claim</router-link>
+    </div>
+
     <!-- Top Details Card -->
     <div v-if="claim" class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
@@ -282,7 +299,7 @@ onMounted(() => {
     </div>
 
     <!-- Items Table Container -->
-    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+    <div v-if="!notFound" class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
       <div class="p-6 border-b border-slate-100 flex items-center justify-between">
         <div>
           <h3 class="font-bold text-base text-slate-900">Rincian item ({{ items.length }})</h3>
@@ -299,7 +316,7 @@ onMounted(() => {
               <th class="py-3.5 px-6">KUANTITAS</th>
               <th class="py-3.5 px-6">HARGA SATUAN</th>
               <th class="py-3.5 px-6">SUBTOTAL</th>
-              <th class="py-3.5 px-6 text-right" v-if="claim?.status === 'DRAFT'">AKSI</th>
+              <th class="py-3.5 px-6 text-right">AKSI</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
@@ -322,17 +339,52 @@ onMounted(() => {
               <td class="py-4 px-6 font-semibold text-slate-700">{{ item.quantity }}</td>
               <td class="py-4 px-6 text-slate-600">{{ formatRupiah(item.unitPrice) }}</td>
               <td class="py-4 px-6 font-bold text-slate-900">{{ formatRupiah(item.amount) }}</td>
-              <td class="py-4 px-6 text-right" v-if="claim?.status === 'DRAFT'">
+              <td class="py-4 px-6 text-right">
                 <button
+                  @click="openItemDetail(item)"
+                  class="text-xs font-semibold text-slate-600 hover:text-slate-800 hover:underline cursor-pointer mr-3"
+                >
+                  Detail
+                </button>
+                <button
+                  v-if="claim?.status === 'DRAFT'"
                   @click="openEditItemModal(item)"
                   class="text-xs font-semibold text-emerald-700 hover:text-emerald-800 hover:underline cursor-pointer"
                 >
-                  Edit
+                  Ubah
                 </button>
               </td>
             </tr>
           </tbody>
+          <tfoot v-if="items.length > 0" class="border-t border-slate-200 bg-slate-50/75">
+            <tr>
+              <td colspan="4" class="py-3.5 px-6 text-right font-bold text-slate-600">Total</td>
+              <td class="py-3.5 px-6 font-extrabold text-slate-900">{{ formatRupiah(claim?.totalClaim ?? 0) }}</td>
+              <td></td>
+            </tr>
+          </tfoot>
         </table>
+      </div>
+    </div>
+
+    <!-- Modal Detail Claim Item -->
+    <div v-if="detailItem" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+      <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
+          <div>
+            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">DETAIL ITEM - {{ detailItem.id }}</p>
+            <h3 class="text-lg font-extrabold text-slate-900">{{ detailItem.description }}</h3>
+          </div>
+          <button @click="detailItem = null" class="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer">✕</button>
+        </div>
+        <dl class="grid grid-cols-2 gap-4 text-xs">
+          <div><dt class="text-slate-400 font-medium">Kuantitas</dt><dd class="font-bold text-slate-800 mt-0.5">{{ detailItem.quantity }}</dd></div>
+          <div><dt class="text-slate-400 font-medium">Harga satuan</dt><dd class="font-bold text-slate-800 mt-0.5">{{ formatRupiah(detailItem.unitPrice) }}</dd></div>
+          <div><dt class="text-slate-400 font-medium">Total (amount)</dt><dd class="font-extrabold text-slate-900 mt-0.5">{{ formatRupiah(detailItem.amount) }}</dd></div>
+          <div><dt class="text-slate-400 font-medium">Komponen anggaran</dt><dd class="font-bold text-slate-800 mt-0.5">{{ detailItem.componentName || detailItem.budgetComponentId }}</dd></div>
+          <div><dt class="text-slate-400 font-medium">Basis tarif</dt><dd class="font-bold text-slate-800 mt-0.5">{{ detailItem.rateBasis || '-' }}</dd></div>
+          <div><dt class="text-slate-400 font-medium">Tarif maksimum</dt><dd class="font-bold text-slate-800 mt-0.5">{{ formatRupiah(detailItem.maxRate) }}</dd></div>
+        </dl>
       </div>
     </div>
 

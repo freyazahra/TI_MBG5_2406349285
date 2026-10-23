@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 
 const route = useRoute()
-const router = useRouter()
 
 const breadcrumbText = computed(() => {
   if (route.path === '/' || route.path === '/home') return 'Ringkasan'
@@ -25,7 +24,7 @@ function reloadPage() {
     <aside class="w-64 bg-[#093426] text-white flex flex-col justify-between shrink-0 shadow-xl border-r border-[#0d4734]">
       <div>
         <!-- Brand Header -->
-        <div class="p-6 flex items-center gap-3 border-b border-[#124433]">
+        <router-link to="/home" class="p-6 flex items-center gap-3 border-b border-[#124433]" title="Ke Beranda">
           <div class="w-10 h-10 rounded-xl bg-[#e06d53] flex items-center justify-center text-white shadow-md">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
@@ -35,7 +34,7 @@ function reloadPage() {
             <h1 class="font-extrabold text-lg leading-tight tracking-tight">SIMBG</h1>
             <p class="text-xs text-emerald-300 font-medium">Manajemen Bantuan</p>
           </div>
-        </div>
+        </router-link>
 
         <!-- Navigation Menu -->
         <div class="px-4 py-6">
