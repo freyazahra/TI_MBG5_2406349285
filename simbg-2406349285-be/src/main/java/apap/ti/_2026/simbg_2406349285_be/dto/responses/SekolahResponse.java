@@ -19,5 +19,6 @@ public class SekolahResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private long activeAnggaranCount;
+    private long activeAnggaranTotal;
 }
 

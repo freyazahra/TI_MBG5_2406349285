@@ -8,6 +8,9 @@ export interface BaseResponse<T> {
 export interface DashboardData {
   jumlahSekolah: number
   totalAnggaran: number
+  jumlahAnggaran: number
+  jumlahClaim: number
+  totalNominalClaim: number
   jumlahInvoice: number
   totalNominalInvoice: number
 }
@@ -20,6 +23,7 @@ export interface Sekolah {
   createdAt?: string
   updatedAt?: string
   activeAnggaranCount?: number
+  activeAnggaranTotal?: number
 }
 
 export interface Anggaran {

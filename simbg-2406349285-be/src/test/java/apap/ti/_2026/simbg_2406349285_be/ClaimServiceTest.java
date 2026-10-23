@@ -77,4 +77,35 @@ class ClaimServiceTest {
         assertThrows(BadRequestException.class, () -> claimService.updateClaimStatus("CLM0002",
                 UpdateClaimStatusRequest.builder().status("DIAJUKAN").build()));
     }
+
+    @Test
+    @DisplayName("Test Claim Can Only Be Rejected After Verification")
+    void testRejectClaimAfterVerification() {
+        UpdateClaimStatusRequest rejectRequest = UpdateClaimStatusRequest.builder()
+                .status("DITOLAK")
+                .rejectedReason("Dokumen tidak lengkap")
+                .build();
+
+        assertThrows(BadRequestException.class,
+                () -> claimService.updateClaimStatus("CLM0002", rejectRequest));
+
+        CreateClaimItemRequest itemReq = CreateClaimItemRequest.builder()
+                .budgetComponentId("BGC0001")
+                .description("Nasi Box")
+                .quantity(1)
+                .unitPrice(20_000L)
+                .build();
+        claimItemService.createItem("CLM0002", itemReq);
+
+        claimService.updateClaimStatus("CLM0002",
+                UpdateClaimStatusRequest.builder().status("DIAJUKAN").build());
+        claimService.updateClaimStatus("CLM0002",
+                UpdateClaimStatusRequest.builder().status("DIVERIFIKASI").build());
+
+        ClaimResponse rejected = claimService.updateClaimStatus("CLM0002", rejectRequest);
+
+        assertEquals("DITOLAK", rejected.getStatus());
+        assertEquals("Dokumen tidak lengkap", rejected.getRejectedReason());
+        assertEquals(1, rejected.getRejectionCount());
+    }
 }

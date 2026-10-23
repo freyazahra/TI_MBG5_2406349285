@@ -62,6 +62,20 @@ class AnggaranServiceTest {
     }
 
     @Test
+    @DisplayName("Test Create Anggaran With Invalid Status Should Throw")
+    void testCreateAnggaranInvalidStatus() {
+        CreateAnggaranRequest request = CreateAnggaranRequest.builder()
+                .sekolahId("SKL0001")
+                .startPeriod(LocalDate.of(2025, 1, 1))
+                .endPeriod(LocalDate.of(2025, 12, 31))
+                .totalAnggaran(50_000_000L)
+                .status("ARSIP")
+                .build();
+
+        assertThrows(BadRequestException.class, () -> anggaranService.createAnggaran(request));
+    }
+
+    @Test
     @DisplayName("Test Create Budget Component Exceeding Total Anggaran Should Throw")
     void testCreateBudgetComponentExceedingAnggaran() {
         CreateAnggaranRequest angReq = CreateAnggaranRequest.builder()

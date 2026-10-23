@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { simbgService } from '@/services/simbg.service'
 import type { Sekolah } from '@/types'
+import { formatRupiah } from '@/utils/formatters'
 
 const loading = ref(true)
 const schools = ref<Sekolah[]>([])
@@ -93,14 +94,16 @@ onMounted(() => {
               <th class="py-3.5 px-6">JENJANG</th>
               <th class="py-3.5 px-6">ALAMAT</th>
               <th class="py-3.5 px-6 text-right">ANGGARAN AKTIF</th>
+              <th class="py-3.5 px-6 text-right">TOTAL ANGGARAN AKTIF</th>
+              <th class="py-3.5 px-6">DIBUAT</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
             <tr v-if="loading">
-              <td colspan="5" class="py-12 text-center text-slate-400 font-medium">Memuat data sekolah...</td>
+              <td colspan="7" class="py-12 text-center text-slate-400 font-medium">Memuat data sekolah...</td>
             </tr>
             <tr v-else-if="filteredSchools.length === 0">
-              <td colspan="5" class="py-12 text-center text-slate-400 font-medium">Tidak ada data sekolah ditemukan.</td>
+              <td colspan="7" class="py-12 text-center text-slate-400 font-medium">Tidak ada data sekolah ditemukan.</td>
             </tr>
             <tr
               v-for="s in filteredSchools"
@@ -125,6 +128,10 @@ onMounted(() => {
               <td class="py-4 px-6 text-right font-medium text-slate-700">
                 {{ s.activeAnggaranCount !== undefined ? s.activeAnggaranCount + ' periode' : '-' }}
               </td>
+              <td class="py-4 px-6 text-right font-medium text-slate-700">
+                {{ s.activeAnggaranTotal !== undefined ? formatRupiah(s.activeAnggaranTotal) : '-' }}
+              </td>
+              <td class="py-4 px-6 text-slate-500">{{ s.createdAt ? s.createdAt.substring(0, 10) : '-' }}</td>
             </tr>
           </tbody>
         </table>

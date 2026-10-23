@@ -12,6 +12,9 @@ import lombok.NoArgsConstructor;
 public class DashboardResponse {
     private long jumlahSekolah;
     private long totalAnggaran;
+    private long jumlahAnggaran;
+    private long jumlahClaim;
+    private long totalNominalClaim;
     private long jumlahInvoice;
     private long totalNominalInvoice;
 }

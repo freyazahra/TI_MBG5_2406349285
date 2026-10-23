@@ -64,6 +64,9 @@ public class AnggaranServiceImpl implements AnggaranService {
         String status = (request.getStatus() != null && !request.getStatus().isBlank())
                 ? request.getStatus().toUpperCase()
                 : "AKTIF";
+        if (!"AKTIF".equals(status) && !"NONAKTIF".equals(status)) {
+            throw new BadRequestException("Status anggaran harus AKTIF atau NONAKTIF");
+        }
 
         Anggaran anggaran = Anggaran.builder()
                 .id(generatedId)

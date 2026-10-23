@@ -197,6 +197,24 @@ Format Response Standar:
 | 21 | GET | `/invoice/{invoiceNumber}` | Detail invoice beserta rincian item |
 | 22 | GET | `/invoice/statistik` | Statistik status klaim & tren bulanan invoice |
 
+Contoh isi `data` untuk endpoint dashboard:
+```json
+{
+  "jumlahSekolah": 10,
+  "totalAnggaran": 320000000,
+  "jumlahAnggaran": 4,
+  "jumlahClaim": 11,
+  "totalNominalClaim": 892000,
+  "jumlahInvoice": 4,
+  "totalNominalInvoice": 861000
+}
+```
+
+Setiap item pada `GET /sekolah` memuat `id`, `nama`, `educationLevel`, `address`,
+`createdAt`, `updatedAt`, `activeAnggaranCount`, dan `activeAnggaranTotal`.
+`activeAnggaranCount` serta `activeAnggaranTotal` hanya menghitung anggaran
+dengan status `AKTIF`.
+
 ---
 
 ## 6. Panduan Instalasi dan Menjalankan Proyek

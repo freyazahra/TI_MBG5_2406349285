@@ -8,6 +8,9 @@ const loading = ref(true)
 const dashboard = ref<DashboardData>({
   jumlahSekolah: 0,
   totalAnggaran: 0,
+  jumlahAnggaran: 0,
+  jumlahClaim: 0,
+  totalNominalClaim: 0,
   jumlahInvoice: 0,
   totalNominalInvoice: 0,
 })
@@ -60,7 +63,7 @@ onMounted(() => {
     </div>
 
     <!-- Summary Cards Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
       <!-- Card 1: Total Anggaran -->
       <div class="p-6 rounded-2xl bg-[#093426] text-white shadow-lg relative overflow-hidden flex flex-col justify-between">
         <div class="flex items-start justify-between">
@@ -78,13 +81,8 @@ onMounted(() => {
         </div>
 
         <div class="mt-8 pt-4 border-t border-[#145a43] flex items-center justify-between text-xs text-emerald-200">
-          <span>2 periode anggaran</span>
-          <span class="flex items-center gap-1 font-semibold text-emerald-300">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-            </svg>
-            71.5% teralokasi
-          </span>
+          <span>{{ dashboard.jumlahAnggaran }} periode anggaran</span>
+          <router-link to="/anggaran" class="font-semibold text-emerald-300">Lihat ↗</router-link>
         </div>
       </div>
 
@@ -108,6 +106,20 @@ onMounted(() => {
           <span class="text-slate-500">Institusi penerima program</span>
           <router-link to="/sekolah" class="font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1">
             Lihat <span>↗</span>
+          </router-link>
+        </div>
+      </div>
+
+      <!-- Card: Total Claim -->
+      <div class="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+        <div>
+          <p class="text-xs font-medium text-slate-500">Total claim</p>
+          <h3 class="text-3xl font-extrabold text-slate-900 mt-2">{{ dashboard.jumlahClaim }}</h3>
+        </div>
+        <div class="mt-8 pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
+          <span class="text-slate-500">Nilai {{ formatRupiah(dashboard.totalNominalClaim) }}</span>
+          <router-link to="/claim" class="font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1">
+            Detail <span>↗</span>
           </router-link>
         </div>
       </div>
