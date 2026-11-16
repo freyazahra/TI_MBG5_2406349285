@@ -5,6 +5,7 @@
 
 - **Nama:** Freya Zahra Anindyabhakti  
 - **NPM:** 2406349285  
+- **Kelas:** A
 - **Modul:** MBG5 (Anggaran dan Tagihan)  
 
 ---
@@ -13,6 +14,20 @@
 
 > **Status:** petunjuk dan placeholder berikut merupakan draf. Isi data AWS,
 > GitLab, Docker Hub, serta tangkapan layar setelah deployment benar-benar berhasil.
+
+### Ringkasan persiapan
+
+- VM AWS EC2 Ubuntu 26.04 LTS dengan tipe `t2.medium` telah dibuat dan
+  Docker serta Docker Compose telah dipasang.
+- Firewall Security Group telah dikonfigurasi untuk port 22, 80, 8080, 8081,
+  13000, dan 19090; Elastic IP telah dialokasikan dan dipasang ke VM.
+- `Dockerfile` multistage untuk backend dan frontend serta konfigurasi Nginx
+  untuk SPA dan proxy API telah dibuat.
+- `docker-compose.yaml` dan konfigurasi Prometheus telah disiapkan; container
+  PostgreSQL, Prometheus, dan Grafana telah dijalankan di VM.
+- Skrip `.gitlab-ci.yml` telah disiapkan untuk build image dengan Buildah dan
+  deployment melalui SSH. Pipeline dan deployment aplikasi belum diverifikasi
+  karena GitLab tidak dapat diakses pada waktu pengumpulan.
 
 Repositori ini berisi **satu** backend Spring Boot (`simbg-2406349285-be`) dan
 satu frontend Vue (`simbg-2406349285-fe`). Contoh `author-app` dan `library-app`
@@ -27,7 +42,7 @@ browser tidak memanggil `localhost` milik pengguna.
 1. Siapkan akses AWS, proyek GitLab praktikum di
    `https://gitlab.cs.ui.ac.id/apap-gasal-2026-2027/praktikum-7/2406349285`,
    akun Docker Hub, dan akses untuk membuat runner GitLab.
-2. Di AWS EC2, buat instance deployment Ubuntu Server 24.04 LTS dengan
+2. Di AWS EC2, buat instance deployment Ubuntu Server 26.04 LTS dengan
    arsitektur **x86_64/amd64**. Pilih ukuran dan kapasitas disk yang cukup untuk
    Java, Docker, PostgreSQL, dan monitoring; perhatikan kuota dan biaya AWS.
    Buat/download key pair `.pem`, simpan di luar repositori, dan gunakan
@@ -160,10 +175,11 @@ kesiapan oleh skrip deployment.
    Nilai yang memuat karakter khusus di `.env` Compose harus mengikuti aturan
    quoting/interpolasi Compose; pastikan nilai di GitLab benar-benar sama.
 
-   **Penting:** repositori saat ini sudah melacak
-   `simbg-2406349285-be/.env`. Jangan menaruh password deployment di sana.
-   Jika file tersebut pernah berisi kredensial nyata, anggap sudah terpapar,
-   segera rotasi kredensial dan tangani riwayat Git sesuai kebijakan proyek.
+   **Penting:** `simbg-2406349285-be/.env` pernah terlacak dalam riwayat Git
+   meskipun sudah dihapus dari tracking. Jangan menaruh password deployment di
+   sana. Jika file tersebut pernah berisi kredensial nyata, anggap sudah
+   terpapar, segera rotasi kredensial dan tangani riwayat Git sesuai kebijakan
+   proyek.
 
 ### 5. Daftarkan GitLab Runner
 
@@ -493,3 +509,7 @@ npm run dev
 npm run build
 ```
 Front End dapat diakses melalui browser pada: `http://localhost:5173`.
+
+---
+
+**Catatan:** Tangkapan layar hasil deployment ke VM AWS tidak dapat dilampirkan saat ini karena server GitLab CSUI sedang mengalami downtime pada waktu pengumpulan, sehingga pipeline CI/CD tidak dapat dieksekusi.
