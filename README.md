@@ -29,6 +29,27 @@
   deployment melalui SSH. Pipeline dan deployment aplikasi belum diverifikasi
   karena GitLab tidak dapat diakses pada waktu pengumpulan.
 
+### Hasil verifikasi dan kendala pengumpulan
+
+Pada 16 November 2026, pemeriksaan dari terminal menunjukkan:
+
+- SSH ke VM berhasil menggunakan key pair; Docker dan Docker Compose terpasang,
+  dan daemon Docker berstatus `active`.
+- Container PostgreSQL, Prometheus, dan Grafana berstatus `Up`. PostgreSQL
+  juga berstatus `healthy`.
+- Koneksi TCP dari komputer lokal ke port 22, 80, 8080, 8081, 13000, dan
+  19090 berhasil. Hasil ini tidak membuktikan akses dari semua jaringan atau
+  bahwa aplikasi pada setiap port berfungsi dengan benar.
+- Endpoint health Grafana mengembalikan HTTP 200 dengan database `ok`, dan
+  endpoint readiness Prometheus mengembalikan HTTP 200.
+
+Menurut kondisi yang dilaporkan saat pengumpulan, server GitLab tidak dapat
+diakses sejak pukul 8 hingga waktu pengumpulan (deadline). Karena itu, trigger
+pipeline, proses build dan push image, akses runner ke registry dan VM,
+deployment aplikasi, serta pengujian aplikasi secara end-to-end belum dapat
+diverifikasi. Pengujian tersebut perlu dilakukan setelah GitLab kembali
+tersedia; hasil pemeriksaan AWS di atas bukan bukti deployment telah berhasil.
+
 Repositori ini berisi **satu** backend Spring Boot (`simbg-2406349285-be`) dan
 satu frontend Vue (`simbg-2406349285-fe`). Contoh `author-app` dan `library-app`
 di panduan praktikum merupakan aplikasi lain dan tidak ada di repositori ini.
