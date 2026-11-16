@@ -1,0 +1,47 @@
+stages:
+  - build
+  - deploy
+
+variables:
+  STORAGE_DRIVER: vfs
+  BUILDAH_FORMAT: docker
+  BUILDAH_ISOLATION: chroot
+
+.build-image:
+  stage: build
+  image: quay.io/buildah/stable
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+  before_script:
+    - printf 'unqualified-search-registries = ["docker.io"]\nshort-name-mode = "disabled"\n' > /etc/containers/registries.conf
+    - printf '%s' "$DOCKERHUB_TOKEN" | buildah login --username "$DOCKERHUB_USERNAME" --password-stdin docker.io
+  script:
+    - buildah build --platform linux/amd64 -t "docker.io/$DOCKERHUB_USERNAME/$IMAGE_NAME:$CI_COMMIT_SHA" "$BUILD_CONTEXT"
+    - buildah push "docker.io/$DOCKERHUB_USERNAME/$IMAGE_NAME:$CI_COMMIT_SHA"
+
+build-backend:
+  extends: .build-image
+  variables:
+    IMAGE_NAME: simbg-backend
+    BUILD_CONTEXT: simbg-2406349285-be
+
+build-frontend:
+  extends: .build-image
+  variables:
+    IMAGE_NAME: simbg-frontend
+    BUILD_CONTEXT: simbg-2406349285-fe
+
+deploy:
+  stage: deploy
+  image: alpine:3.23.4
+  needs: [build-backend, build-frontend]
+  resource_group: production
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+  before_script:
+    - apk add --no-cache openssh-client
+    - mkdir -p ~/.ssh && chmod 700 ~/.ssh
+    - cp "$SSH_PRIVATE_KEY" ~/.ssh/id_deploy && chmod 600 ~/.ssh/id_deploy
+    - cp "$SSH_KNOWN_HOSTS" ~/.ssh/known_hosts && chmod 600 ~/.ssh/known_hosts
+  script:
+    - sh ci/deploy.sh
